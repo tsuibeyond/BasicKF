@@ -1,11 +1,11 @@
-clear
-clc;
+% clear
+% clc;
 
 %%%%%%%%%%%%%%%直接法 卡尔曼滤波 （正弦波跟踪）%%%%%%%%%%%%%%%%%%%%%%
 t=0:0.01:(10-0.01);
 kf.trueValue = 10*sin(0.5*pi*t);             % 生成正弦波数据
 kf.X = zeros(size(kf.trueValue));
-kf.Z = 0.5*randn(size(t)) + kf.trueValue;    % 生成测量数据
+kf.Z = kf.measurement; %0.5*randn(size(t)) + kf.trueValue;    % 生成测量数据
 
 nStates = 1;
 mMeasures = 1;
@@ -27,7 +27,8 @@ for i = 2 : length(t)
     kf.PHI = BB(nStates+1:2*nStates,nStates+1:2*nStates)';
     kf.Qk = kf.PHI*BB(1:nStates,nStates+1:2*nStates);
     
-    kf.X(i) = kf.PHI*kf.X(i - 1);   % 一步预测 
+%     kf.X(i) = kf.PHI*kf.X(i - 1);   % 一步预测 
+    kf.X(i) = kf.X(i-1) + kf.xdot*det_t;
     kf.P(:,:,i) = kf.PHI*kf.P(:,:,i-1)*kf.PHI' + kf.Qk; % 一步预测协方差
     kf.K(:,:,i) = kf.P(:,:,i)*kf.H'/(kf.H*kf.P(:,:,i)*kf.H' + kf.R); % 滤波增益计算
     kf.X(i) = kf.X(i) + kf.K(:,:,i) * (kf.Z(i) - kf.X(i));
